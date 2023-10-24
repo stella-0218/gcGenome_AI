@@ -14,8 +14,11 @@ data = data.iloc[:,1:]
 ##1-1. 주어진 원시 데이터의 기본 특성을 파악하고, 모델 학습에 사용하기 앞서 어떠한 전처리 단계가 필요한지 구체적으로 서술하세요.
 
 # 주어진 데이터는  Output 칼럼이 존재하고 1,0 으로 구성되어있으며, 앞의 11개 칼럼의 경우 숫자형데이터로 이루어진 칼럼과
-# 범주형 데이터로 이루어진 칼럼이 있다. 0과 1로 구성된 Output 칼럼이 존재하기 때문에, Binary Classification 모델을 학습하기 전에 
-# 범주형 데이터는 숫자형 데이터로 변환하여 입력해야 하며, Float로 입력되어야 한다. 
+# 범주형 데이터로 이루어진 칼럼이 있습니다. 0과 1로 구성된 Output 칼럼이 존재하기 때문에, Binary Classification 모델을 학습하기 전에 
+# 범주형 데이터는 숫자형 데이터로 변환하여 입력해야 하며, Float로 입력되어야 합니다. NA를 데이터 전처리 과정에서 처리해야 하는데, 
+# NA를 포함하는 row를 제거하는 방법은 샘플의 수가 770개 정도에서 절반정도로 줄어드는 리스크가 있기 때문에 제거하기 보다, 다른 값으로 
+# 대치하는 방법을 택합니다. 데이터를 살펴보면 이상치로 볼 수 있는, 전반적 범주에서 벗어난 값들이 있기 때문에, 이상치에 영향을 받지 않는
+# 중앙값으로 대체하는 방법을 택합니다. 
 
 
 ######################################################
@@ -30,7 +33,7 @@ data = pd.get_dummies(data, columns=categorical_columns)
 train_data = data.sample(frac=0.8, random_state=42)
 test_data = data.drop(train_data.index)
 
-############ 2. 결측값 처리: NA 값을 평균으로 대체 #############
+############ 2. 결측값 처리: NA 값을 중앙값으로 대체 #############
 numeric_cols = data.select_dtypes(include=['float64', 'int64']).columns
 train_data[numeric_cols] = train_data[numeric_cols].fillna(train_data[numeric_cols].median())
 test_data[numeric_cols] = test_data[numeric_cols].fillna(train_data[numeric_cols].median())
@@ -145,8 +148,8 @@ class NeuralNet(nn.Module):
         return self.sigmoid(self.layer(x))
 
 ######################### 2.  학습  #############################
-######################### device = 'cuda'로 설정하면 GPU 로 연산하도록 할 수 있지만 부동소수연산이기 때문에
-######################### 따로 gpu로 연산하도록 하지 않고 cpu로 연산하도록 하였습니다. 
+########device = 'cuda'로 설정하면 GPU 로 연산하도록 할 수 있지만 부동소수연산이기 때문에################# 
+######## 따로 gpu로 연산하도록 하지 않고 cpu로 연산하도록 하였습니다. ###################################
 model = NeuralNet(X_train.shape[1])
 criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.01)
