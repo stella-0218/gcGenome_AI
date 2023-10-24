@@ -1,1 +1,85 @@
+###########################################################################################################################
+2. cfDNA (cell free DNA) – WGS 데이터(coverage: ~5X, 100PE 생산)를 이용해, 암환자와 정상인을
+   구분할 수 있는 방법에 대해 구체적으로 서술하세요. (정상인 200명, 간암 100명, 췌장암 100명, 유방암 100명의 데이터가 있습니다.)
+###########################################################################################################################
 
+암 환자에서는 종양 세포들이 파괴되면서 종양에서 나온 cfDNA가 혈액 중에 더 많이 나타나게 됩니다. 
+이러한 cfDNA의 특징을 이용해 WGS (Whole Genome Sequencing) 데이터를 분석하여 암 환자와 정상인을 구분합니다.
+
+
+1. 데이터 전처리 및 품질 검사
+WGS 데이터의 품질을 확인하고 필요한 경우 품질 개선 작업을 수행합니다.
+불필요한 시퀀스 제거, 어댑터 시퀀스 제거, 낮은 품질의 리드 필터링 등의 작업을 진행합니다.
+
+##STAR2를 사용해 alignment하고 , trimmomatic을 사용해 전처리 합니다 ##
+
+2. Variant Calling
+정제된 WGS 데이터에서 변이(variants)를 호출합니다.
+Germline 및 somatic 변이를 확인하여 암과 관련된 변이를 식별합니다.
+
+##GATK를 사용해 variant calling 합니다 ##
+## Mutect, Strelka를 사용해 mutation을 calling합니다 ##
+
+3. Feature Engineering
+각 샘플에서 추출된 변이를 피처로 사용합니다.
+변이 빈도, 유전자 영역, 변이 유형 등을 고려하여 피처를 생성합니다.
+
+
+4. 데이터셋 구성
+정상인과 각 암 유형별로 레이블을 지정합니다. (정상: 0, 간암: 1, 췌장암: 2, 유방암: 3)
+Stratified sampling 방법을 사용하여 훈련 및 테스트 데이터셋을 구성합니다.
+(stratified sampling :  표본과 모집단의 동질성을 확보함으로써 가능한 표집오차를 줄이면서 대표성을 강화시키는 방식)
+
+5. 모델 선택 및 학습
+Random Forest, Gradient Boosting, Support Vector Machine(SVM), Neural Networks 등의 모델을 고려합니다.
+Cross-validation을 사용하여 모델을 학습시키고 최적의 하이퍼파라미터를 선택합니다.
+
+6. 모델 평가
+Accuracy, Precision, Recall, F1-score 등의 메트릭을 사용하여 모델의 성능을 평가합니다.
+Multi-class classification 문제로 접근하므로, 각 클래스별로 성능을 평가합니다.
+
+7. 모델 해석
+Feature Importance를 분석하여 어떤 변이가 암과 정상 구분에 큰 영향을 미치는지 파악합니다.
+SHAP, LIME 등의 방법을 사용하여 모델의 예측을 해석하고 중요한 피처를 식별합니다.
+
+8. 검증 및 최적화
+외부 데이터셋을 사용하여 모델의 일반화 성능을 검증합니다.
+필요한 경우, 모델을 미세 조정하거나 다른 모델과 앙상블을 고려합니다.
+
+
+신경망을 사용해 tensorflow로 학습하는 모델은 예를 들어 
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# 가정: X는 피처들로 이루어진 데이터, y는 레이블 (0: 정상, 1: 암환자)
+X, y = load_your_data() 
+
+# 데이터를 훈련 세트와 테스트 세트로 분리
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 데이터 스케일링
+scaler = StandardScaler().fit(X_train)
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 신경망 모델 구성
+model = keras.Sequential([
+    layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    layers.Dropout(0.5),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+
+# 모델 컴파일
+model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
+
+# 모델 학습
+model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2)
+
+# 모델 평가
+loss, accuracy = model.evaluate(X_test, y_te
