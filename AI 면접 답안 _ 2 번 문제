@@ -19,6 +19,7 @@ Germline 및 somatic 변이를 확인하여 암과 관련된 변이를 식별합
 
 ##GATK를 사용해 variant calling 합니다 ##
 ## Mutect, Strelka를 사용해 mutation을 calling합니다 ##
+##funcotator를 사용해 mutation annotation  한 뒤 , MutSig을 사용해 암과 관련된 mutation을 식별합니다 ##
 
 3. Feature Engineering
 각 샘플에서 추출된 변이를 피처로 사용합니다.
