@@ -15,11 +15,15 @@ WGS 데이터의 품질을 확인하고 필요한 경우 품질 개선 작업을
 
 2. Variant Calling
 정제된 WGS 데이터에서 변이(variants)를 호출합니다.
-Germline 및 somatic 변이를 확인하여 암과 관련된 변이를 식별합니다.
+Germline 및 somatic 변이를 확인하여 각 암과 관련된 변이를 식별합니다.
+췌장암 - KRAS, SMAD4, TP53
+유방암 - HER2
+간암 - P53
 
 ##GATK를 사용해 variant calling 합니다 ##
-## Mutect, Strelka를 사용해 mutation을 calling합니다 ##
+## Mutect2, Strelka를 사용해 mutation을 calling합니다 ##
 ##funcotator를 사용해 mutation annotation  한 뒤 , MutSig을 사용해 암과 관련된 mutation을 식별합니다 ##
+## GATK, GISTIC2를 사용해 copy number variation정보를 분석합니다 ##
 
 3. Feature Engineering
 각 샘플에서 추출된 변이를 피처로 사용합니다.
