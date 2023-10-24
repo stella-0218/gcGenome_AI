@@ -5,12 +5,24 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-# 데이터 파일 경로
+
+1-1. 주어진 원시 데이터의 기본 특성을 파악하고, 모델 학습에 사용하기 앞서 어떠한 전처리 단계가 필요한지 구체적으로 서술하세요.
+
+# 주어진 데이터는  Output 칼럼이 존재하고 1,0 으로 구성되어있으며, 앞의 11개 칼럼의 경우 숫자형데이터로 이루어진 칼럼과
+# 범주형 데이터로 이루어진 칼럼이 있다. 
+
+
+############ 데이터 파일 경로####################
 file_path = "C:/Users/sandia/Desktop/AI_input.csv"
 data = pd.read_csv(file_path)
 data = data.iloc[:,1:]
 
-# 범주형 데이터 처리 
+######################################################
+############## 데이터 전처리 ###########################
+######################################################
+
+
+############ 1. 범주형 데이터 처리 ##########################
 categorical_columns = ['Religion', 'DietGroup', 'FamilyHistory']
 data = pd.get_dummies(data, columns=categorical_columns)
 
@@ -18,7 +30,7 @@ train_data = data.sample(frac=0.8, random_state=42)
 test_data = data.drop(train_data.index)
 ...
 
-# 결측값 처리: NA 값을 평균으로 대체
+############ 2. 결측값 처리: NA 값을 평균으로 대체 #############
 numeric_cols = data.select_dtypes(include=['float64', 'int64']).columns
 train_data[numeric_cols] = train_data[numeric_cols].fillna(train_data[numeric_cols].median())
 test_data[numeric_cols] = test_data[numeric_cols].fillna(train_data[numeric_cols].median())
@@ -27,18 +39,21 @@ test_data[numeric_cols] = test_data[numeric_cols].fillna(train_data[numeric_cols
 object_cols = train_data.select_dtypes(include=['object']).columns
 bool_cols = train_data.select_dtypes(include=['bool']).columns
 
-# 데이터를 모두 'float' 타입으로 변환합니다.
+########## 3.  데이터를 모두 'float' 타입으로 변환합니다. ########
 for dtype, cols in zip(['object', 'bool'], [object_cols, bool_cols]):
     for col in cols:
         train_data[col] = train_data[col].astype(float)
         test_data[col] = test_data[col].astype(float)
 
 
-# Tensor 변환
+######################## 4. Tensor 변환 ########################
 X_train = torch.tensor(train_data.drop('Outcome', axis=1).values).float()
 y_train = torch.tensor(train_data['Outcome'].values).float()
 X_test = torch.tensor(test_data.drop('Outcome', axis=1).values).float()
 y_test = torch.tensor(test_data['Outcome'].values).float()
+
+
+
 
 # 모델 정의
 class NeuralNet(nn.Module):
